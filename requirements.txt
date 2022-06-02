@@ -1,4 +1,4 @@
+json
 os
 requests
-time
-pprint
+from tqdm import tqdm

@@ -1,12 +1,15 @@
+import json
 import os
 import requests
+from tqdm import tqdm
+
 
 def input_info():
     print('Введите ID Пользователя:')
-    OWNER_ID = input()
+    OWNER_ID = #input()
 
     print('Введите токен Яндекс Диск:')
-    API_TOKEN = input()
+    API_TOKEN =  #input()
     YdUploader(API_TOKEN).photos_upload(VkDownloader(OWNER_ID).photos_download())
 
 
@@ -28,8 +31,8 @@ class VkDownloader:
 
         if not os.path.exists(self.FOLDER):
             os.mkdir(self.FOLDER)
-
-        for album_id in album_ids:
+        print('Скачиваю файлы')
+        for album_id in tqdm(album_ids):
             parameters = dict(access_token=self.API_TOKEN, v=self.API_VERSION, owner_id=self.OWNER_ID,
                               album_id=album_id, count=API_FILE_COUNT, extended=API_EXTENDED)
             request_info = requests.get(self.API_LINK + API_METHOD, params=parameters)
@@ -44,8 +47,7 @@ class VkDownloader:
                     if file_name in files_names:
                         file_name = f'{file_likes}_{file_date}.jpg'
                     files_names.add(file_name)
-                    files_list.append({'link': file_link, 'size': file_size,
-                                       'name': file_name})
+                    files_list.append({'name': file_name, 'size': file_size, 'link': file_link})
 
                     download_request = requests.get(file_link)
                     download_folder = os.path.join(self.FOLDER, file_name)
@@ -54,7 +56,10 @@ class VkDownloader:
 
             except KeyError:
                 pass
-        print(files_list)
+        with open('photos_json.txt', 'w') as json_file:
+            json_data = {'content': files_list}
+            json.dump(json_data, json_file)
+        print('Создал JSON файл')
         return files_list
 
 
@@ -71,9 +76,10 @@ class YdUploader:
 
         API_METHOD_FOLDER = 'resources'
         folder_request_url = self.API_LINK + API_METHOD_FOLDER
-        requests.put(folder_request_url, headers={'Authorization': self.API_TOKEN}, params={'path': f'{self.FOLDER}'})
 
-        for file in files_list:
+        print('Загружаю файлы')
+        requests.put(folder_request_url, headers={'Authorization': self.API_TOKEN}, params={'path': f'{self.FOLDER}'})
+        for file in tqdm(files_list):
             file_name = file['name']
             file_path = os.path.join(f'{self.FOLDER}/', file_name)
             upload_request = requests.get(upload_yd, headers={'Authorization': self.API_TOKEN},
