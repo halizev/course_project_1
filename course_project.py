@@ -57,8 +57,7 @@ class VkDownloader:
             except KeyError:
                 pass
         with open('photos_json.txt', 'w') as json_file:
-            json_data = {'content': files_list}
-            json.dump(json_data, json_file)
+            json.dump(files_list, json_file)
         print('Создал JSON файл')
         return files_list
 
